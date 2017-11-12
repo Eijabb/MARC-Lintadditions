@@ -11,7 +11,7 @@ Currently fails some tests due to subfield 6 not being 1st (Lint not yet fixed t
 =cut
 
 use strict;
-use Test::More tests=>67;
+use Test::More tests=>68;
 
 BEGIN { use_ok( 'MARC::File::USMARC' ); }
 BEGIN { use_ok( 'MARC::Lintadditions' ); }
@@ -61,6 +61,8 @@ FROM_TEXT: {
 		['007', "vf mbahou " #extra space after
 		],
 		['007', "vf mbaho" #extra space after
+		],
+		['007', "ru aa0abadn" #invalid 09-10 pair
 		],
 		['020', "","",
 			a => "154879474",
@@ -239,7 +241,7 @@ FROM_TEXT: {
 
 
 	);
-	is( $nfields, 48, "All the fields added OK" );
+	is( $nfields, 49, "All the fields added OK" );
 
 	my @expected = (
 		q{007: byte 2, 'u' is no longer valid.},
@@ -248,6 +250,7 @@ FROM_TEXT: {
 		q{007: 007 has data after limit.},
 		q{007: Check for trailing space (vf mbahou  does not match vf mbahou).},
 		q{007: byte 8 () is invalid.},
+		q{007: byte 10 (n) is invalid.},
 		q{020: Subfield a has the wrong number of digits, 154879474.},
 		q{020: Subfield a has bad checksum, 1548794743.},
 		q{020: Subfield a has the wrong number of digits, 15487947443.},

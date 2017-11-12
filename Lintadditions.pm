@@ -8,7 +8,7 @@ use MARC::Lint::CodeData qw(%GeogAreaCodes %ObsoleteGeogAreaCodes %LanguageCodes
 
 use base qw(MARC::Lint);
 
-$VERSION = 1.15;
+$VERSION = 1.16;
 
 =head1 NAME
 
@@ -2381,7 +2381,7 @@ Returns an arrayref containing an 007 within max length.
 Any byte in that arrayref not having an allowed char has value 'bad'.
 Also returns scalarref (which is defined) if 007 has characters other than spaces after the allowed length.  If the only problem is extra spaces, then the returned arrayref data can be used as new 007 data.
 
-Currently (in this code), pipe chars are invalid everywhere, even though the MARC documentation allows them for any byte.
+Currently (in this code), pipe chars are invalid everywhere, even though the MARC documentation allows them for any byte. [as of 2017, this may not be true of the code]
 
 Reference to $visualizerec is either empty (if 007 is of ok length) or '007 has data after limit.'
 
@@ -2493,7 +2493,7 @@ sub validate007 {
             {$map007[2] = $bytes[2];} else {$map007[2] = "bad"}; 
         if ($bytes[3] =~ /^[ ac|]$/ )
             {$map007[3] = $bytes[3];} else {$map007[3] = "bad"}; 
-        if ($bytes[4] =~ /^[ abcdefgjpqrstuyz|]$/ )
+        if ($bytes[4] =~ /^[ abcdefgijlnpqrstuvwyz|]$/ )
             {$map007[4] = $bytes[4];} else {$map007[4] = "bad"}; 
         if ($bytes[5] =~ /^[ fnuz|]$/ )
             {$map007[5] = $bytes[5];} else {$map007[5] = "bad"}; 
@@ -2537,7 +2537,7 @@ sub validate007 {
         #### validate values in each byte ###
         #turn off uninitialized warnings
         no warnings 'uninitialized';
-        if ($bytes[1] =~ /^[ abcfhjmoruz|]$/) 
+        if ($bytes[1] =~ /^[ abcfhjkmorsuz|]$/) 
             {$elecres007[1] = $bytes[1];} else {$elecres007[1] = "bad"}; 
         if ($bytes[2] =~ /^[ ]$/)
             {$elecres007[2] = $bytes[2];} else {$elecres007[2] = "bad"}; 
@@ -2557,12 +2557,38 @@ sub validate007 {
             } 
             else {$elecres007[6] = "bad";};
             if ($bytes[7] && ($bytes[7] =~ /^[ \dmn\-|]$/ ))
-                {$elecres007[7] = $bytes[7];}
+                {$elecres007[7] = $bytes[7];
+                if (($elecres007[6] eq 'm') && ($elecres007[7] ne 'm')) {
+                    $elecres007[7] = "bad";
+                } #if 007/07 doesn't match 007/06 'm'
+                elsif (($elecres007[6] eq 'n') && ($elecres007[7] ne 'n')) {
+                    $elecres007[7] = "bad";
+                } #if 007/07 doesn't match 007/06 'n'
+                elsif (($elecres007[6] eq '-') && ($elecres007[7] ne '-')) {
+                    $elecres007[7] = "bad";
+                } #if 007/07 doesn't match 007/06 '-'
+                elsif (($elecres007[6] eq '|') && ($elecres007[7] ne '|')) {
+                    $elecres007[7] = "bad";
+                } #if 007/07 doesn't match 007/06 '|'
+            } #if 007/07
             elsif (! $bytes[7]) {#end of bytes
             }
             else {$elecres007[7] = "bad";};
             if ($bytes[8] && ($bytes[8] =~ /^[ \dmn\-|]$/ ))
-                {$elecres007[8] = $bytes[8];} 
+                {$elecres007[8] = $bytes[8];
+                if (($elecres007[6] eq 'm') && ($elecres007[8] ne 'm')) {
+                    $elecres007[8] = "bad";
+                } #if 007/08 doesn't match 007/06 'm'
+                elsif (($elecres007[6] eq 'n') && ($elecres007[8] ne 'n')) {
+                    $elecres007[8] = "bad";
+                } #if 007/08 doesn't match 007/06 'n'
+                elsif (($elecres007[6] eq '-') && ($elecres007[8] ne '-')) {
+                    $elecres007[8] = "bad";
+                } #if 007/08 doesn't match 007/06 '-'
+                elsif (($elecres007[6] eq '|') && ($elecres007[8] ne '|')) {
+                    $elecres007[8] = "bad";
+                } #if 007/08 doesn't match 007/06 '|'
+            } #if 007/08
             elsif (! $bytes[8]) {#end of bytes
             }
             else {$elecres007[8] = "bad";};
@@ -2595,11 +2621,37 @@ sub validate007 {
             if ($bytes[6] =~ /^[ \dmn\-|]$/ )
                 {$elecres007[6] = $bytes[6];}
             else {$elecres007[6] = "bad";};
-            if ($bytes[7] =~ /^[ \dmn\-|]$/ )
-                {$elecres007[7] = $bytes[7];}
+            if ($bytes[7] && ($bytes[7] =~ /^[ \dmn\-|]$/ ))
+                {$elecres007[7] = $bytes[7];
+                if (($elecres007[6] eq 'm') && ($elecres007[7] ne 'm')) {
+                    $elecres007[7] = "bad";
+                } #if 007/07 doesn't match 007/06 'm'
+                elsif (($elecres007[6] eq 'n') && ($elecres007[7] ne 'n')) {
+                    $elecres007[7] = "bad";
+                } #if 007/07 doesn't match 007/06 'n'
+                elsif (($elecres007[6] eq '-') && ($elecres007[7] ne '-')) {
+                    $elecres007[7] = "bad";
+                } #if 007/07 doesn't match 007/06 '-'
+                elsif (($elecres007[6] eq '|') && ($elecres007[7] ne '|')) {
+                    $elecres007[7] = "bad";
+                } #if 007/07 doesn't match 007/06 '|'
+            } #if 007/07
             else {$elecres007[7] = "bad";};
-            if ($bytes[8] =~ /^[ \dmn\-|]$/ )
-                {$elecres007[8] = $bytes[8];}
+            if ($bytes[8] && ($bytes[8] =~ /^[ \dmn\-|]$/ ))
+                {$elecres007[8] = $bytes[8];
+                if (($elecres007[6] eq 'm') && ($elecres007[8] ne 'm')) {
+                    $elecres007[8] = "bad";
+                } #if 007/08 doesn't match 007/06 'm'
+                elsif (($elecres007[6] eq 'n') && ($elecres007[8] ne 'n')) {
+                    $elecres007[8] = "bad";
+                } #if 007/08 doesn't match 007/06 'n'
+                elsif (($elecres007[6] eq '-') && ($elecres007[8] ne '-')) {
+                    $elecres007[8] = "bad";
+                } #if 007/08 doesn't match 007/06 '-'
+                elsif (($elecres007[6] eq '|') && ($elecres007[8] ne '|')) {
+                    $elecres007[8] = "bad";
+                } #if 007/08 doesn't match 007/06 '|'
+            } #if 007/08
             else {$elecres007[8] = "bad";};
             if ($bytes[9] =~ /^[ amu|]$/ )
                 {$elecres007[9] = $bytes[9];}
@@ -2658,7 +2710,7 @@ sub validate007 {
             {$globe007[2] = $bytes[2];} else {$globe007[2] = "bad"}; 
         if ($bytes[3] =~ /^[ ac|]$/)
             {$globe007[3] = $bytes[3];} else {$globe007[3] = "bad"}; 
-        if ($bytes[4] =~ /^[ abcdefgpuz|]$/)
+        if ($bytes[4] =~ /^[ abcdefglnpuvwz|]$/)
             {$globe007[4] = $bytes[4];} else {$globe007[4] = "bad"}; 
         if ($bytes[5] =~ /^[ fnuz|]$/)
             {$globe007[5] = $bytes[5];} else {$globe007[5] = "bad"}; 
@@ -2760,7 +2812,7 @@ sub validate007 {
             {$projgraph007[5] = $bytes[5];} else {$projgraph007[5] = "bad"}; 
         if ($bytes[6] =~ /^[ abcdefghiuz|]$/)
             {$projgraph007[6] = $bytes[6];} else {$projgraph007[6] = "bad"}; 
-        if ($bytes[7] =~ /^[ abcdefgjkstuvwxyz|]$/)
+        if ($bytes[7] =~ /^[ abcdefgjkstvwxyz|]$/)
             {$projgraph007[7] = $bytes[7];} else {$projgraph007[7] = "bad"}; 
         if ($bytes[8] =~ /^[ cdehjkmuz|]$/)
             {$projgraph007[8] = $bytes[8];} else {$projgraph007[8] = "bad"}; 
@@ -2796,13 +2848,13 @@ sub validate007 {
         #### validate values in each byte ###
         #turn off uninitialized warnings
         no warnings 'uninitialized';
-        if ($bytes[1] =~ /^[ abcdefguz|]$/) 
+        if ($bytes[1] =~ /^[ abcdefghjuz|]$/) 
             {$microform007[1] = $bytes[1];} else {$microform007[1] = "bad"}; 
         if ($bytes[2] =~ /^[ ]$/)
             {$microform007[2] = $bytes[2];} else {$microform007[2] = "bad"}; 
         if ($bytes[3] =~ /^[ abmu|]$/)
             {$microform007[3] = $bytes[3];} else {$microform007[3] = "bad"}; 
-        if ($bytes[4] =~ /^[ adfghlmnopuz|]$/)
+        if ($bytes[4] =~ /^[ adfghlmopuz|]$/)
             {$microform007[4] = $bytes[4];} else {$microform007[4] = "bad"}; 
         if ($bytes[5] =~ /^[ abcdeuv|]$/)
             {$microform007[5] = $bytes[5];} else {$microform007[5] = "bad"}; 
@@ -2818,7 +2870,7 @@ sub validate007 {
             {$microform007[10] = $bytes[10];} else {$microform007[10] = "bad"}; 
         if ($bytes[11] =~ /^[ abcmu|]$/)
             {$microform007[11] = $bytes[11];} else {$microform007[11] = "bad"}; 
-        if ($bytes[12] =~ /^[ acdprtimnuz|]$/)
+        if ($bytes[12] =~ /^[ acdimnprtuz|]$/)
             {$microform007[12] = $bytes[12];} else {$microform007[12] = "bad"}; 
 ###############################
 #if (my @grepmicroformbad = grep {$_ eq "bad"} @microform007)
@@ -2852,15 +2904,15 @@ sub validate007 {
         #### validate values in each byte ###
         #turn off uninitialized warnings
         no warnings 'uninitialized';
-        if ($bytes[1] =~ /^[ cdefghijlnouz|]$/) 
+        if ($bytes[1] =~ /^[ acdefghijklnopqrsuvz|]$/) 
             {$nonprojgraph007[1] = $bytes[1];} else {$nonprojgraph007[1] = "bad"}; 
         if ($bytes[2] =~ /^[ ]$/)
             {$nonprojgraph007[2] = $bytes[2];} else {$nonprojgraph007[2] = "bad"}; 
         if ($bytes[3] =~ /^[ abchmuz|]$/)
             {$nonprojgraph007[3] = $bytes[3];} else {$nonprojgraph007[3] = "bad"}; 
-        if ($bytes[4] =~ /^[ abcdefghmopqrstuz|]$/)
+        if ($bytes[4] =~ /^[ abcdefghilmnopqrstuvwz|]$/)
             {$nonprojgraph007[4] = $bytes[4];} else {$nonprojgraph007[4] = "bad"}; 
-        if ($bytes[5] =~ /^[ abcdefghmopqrstuz|]$/)
+        if ($bytes[5] =~ /^[ abcdefghilmnopqrstuvwz|]$/)
             {$nonprojgraph007[5] = $bytes[5];} else {$nonprojgraph007[5] = "bad"}; 
 
 ###############################
@@ -2899,7 +2951,7 @@ sub validate007 {
         #### validate values in each byte ###
         #turn off uninitialized warnings
         no warnings 'uninitialized';
-        if ($bytes[1] =~ /^[ cfruz|]$/) 
+        if ($bytes[1] =~ /^[ cforuz|]$/) 
             {$motionpict007[1] = $bytes[1];} else {$motionpict007[1] = "bad"}; 
         if ($bytes[2] =~ /^[ ]$/)
             {$motionpict007[2] = $bytes[2];} else {$motionpict007[2] = "bad"}; 
@@ -2921,7 +2973,7 @@ sub validate007 {
             {$motionpict007[10] = $bytes[10];} else {$motionpict007[10] = "bad"}; 
         if ($bytes[11] =~ /^[ deoruz|]$/)
             {$motionpict007[11] = $bytes[11];} else {$motionpict007[11] = "bad"}; 
-        if ($bytes[12] =~ /^[ acdprtimnuz|]$/)
+        if ($bytes[12] =~ /^[ acdimnprtuz|]$/)
             {$motionpict007[12] = $bytes[12];} else {$motionpict007[12] = "bad"}; 
         if ($bytes[13] =~ /^[ abcdefghijklmnpqrstuvz|]$/)
             {$motionpict007[13] = $bytes[13];} else {$motionpict007[13] = "bad"}; 
@@ -3064,8 +3116,41 @@ sub validate007 {
                 {$remotesensimg007[8] = $bytes[8];} else {$remotesensimg007[8] = "bad"}; 
             if ($bytes[9] =~ /^[ adgjmnprstuz|]$/)
                 {$remotesensimg007[9] = $bytes[9];} else {$remotesensimg007[9] = "bad"}; 
-            if ($bytes[10] =~ /^[ abcdefvzguzmn|]$/)
-                {$remotesensimg007[10] = $bytes[10];} else {$remotesensimg007[10] = "bad"}; 
+            if ($bytes[10] =~ /^[ abcdefgmnuvz|]$/)
+                {$remotesensimg007[10] = $bytes[10];
+                my $bytes0910 = $bytes[9].$bytes[10];
+                my %valid0910 = (
+                    aa => 'Visible light',
+                    da => 'Near infrared',
+                    db => 'Middle infrared',
+                    dc => 'Far infrared',
+                    dd => 'Thermal infrared',
+                    de => 'Shortwave infrared (SWIR)',
+                    df => 'Reflective infrared',
+                    dv => 'Combinations',
+                    dz => 'Other infrared data',
+                    ga => 'Sidelooking airborne radar (SLAR)',
+                    gb => 'Synthetic aperture radar (SAR)-Single frequency',
+                    gc => 'SAR-multi-frequency (multichannel)',
+                    gd => 'SAR-like polarization',
+                    ge => 'SAR-cross polarization',
+                    gf => 'Infometric SAR',
+                    gg => 'polarmetric SAR',
+                    gu => 'Passive microwave mapping',
+                    gz => 'Other microwave data',
+                    ja => 'Far ultraviolet',
+                    jb => 'Middle ultraviolet',
+                    jc => 'Near ultraviolet',
+                    jv => 'Ultraviolet combinations',
+                    jz => 'Other ultraviolet data',
+                    ma => 'Multi-spectral, multidata',
+                    mb => 'Multi-temporal',
+                    mm => 'Combination of various data types',
+                );
+                unless (exists $valid0910{$bytes0910}){
+                    $remotesensimg007[10] = "bad";
+                } #unless 007/09-10 are a valid pair
+                } else {$remotesensimg007[10] = "bad"}; 
 
 ###############################
 #if (my @grepremotesensimgbad = grep {$_ eq "bad"} @remotesensimg007)
@@ -3100,17 +3185,17 @@ sub validate007 {
         #### validate values in each byte ###
         #turn off uninitialized warnings
         no warnings 'uninitialized';
-        if ($bytes[1] =~ /^[ degiqstuwz|]$/) 
+        if ($bytes[1] =~ /^[ degiqrstuwz|]$/) 
             {$soundrec007[1] = $bytes[1];} else {$soundrec007[1] = "bad"}; 
         if ($bytes[2] =~ /^[ ]$/)
             {$soundrec007[2] = $bytes[2];} else {$soundrec007[2] = "bad"}; 
-        if ($bytes[3] =~ /^[ abcdefhiklmopruz|]$/)
+        if ($bytes[3] =~ /^[ abcdefhiklmnopruz|]$/)
             {$soundrec007[3] = $bytes[3];} else {$soundrec007[3] = "bad"}; 
         if ($bytes[4] =~ /^[ mqsuz|]$/)
             {$soundrec007[4] = $bytes[4];} else {$soundrec007[4] = "bad"}; 
         if ($bytes[5] =~ /^[ mnsuz|]$/)
             {$soundrec007[5] = $bytes[5];} else {$soundrec007[5] = "bad"}; 
-        if ($bytes[6] =~ /^[ abcdefgjonsuz|]$/)
+        if ($bytes[6] =~ /^[ abcdefgjnosuz|]$/)
             {$soundrec007[6] = $bytes[6];} else {$soundrec007[6] = "bad"}; 
         if ($bytes[7] =~ /^[ lmnopuz|]$/)
             {$soundrec007[7] = $bytes[7];} else {$soundrec007[7] = "bad"}; 
@@ -3118,8 +3203,8 @@ sub validate007 {
             {$soundrec007[8] = $bytes[8];} else {$soundrec007[8] = "bad"}; 
         if ($bytes[9] =~ /^[ abdimnrstuz|]$/)
             {$soundrec007[9] = $bytes[9];} else {$soundrec007[9] = "bad"}; 
-        #Note, byte 10 of soundrec used to be 'n' for cassettes, now 'p' ##
-        if ($bytes[10] =~ /^[ abcgilmprsuwz|]$/)
+        #Note, byte 10 of soundrec used to be 'n' for cassettes, now 'p'; 'n' redefined in 2016 as Not applicable ##
+        if ($bytes[10] =~ /^[ abcgilmnprsuwz|]$/)
             {$soundrec007[10] = $bytes[10];} else {$soundrec007[10] = "bad"}; 
         if ($bytes[11] =~ /^[ hlnu|]$/)
             {$soundrec007[11] = $bytes[11];} else {$soundrec007[11] = "bad"}; 
@@ -3336,6 +3421,12 @@ MARC Report (http://www.marcofquality.com) -- More full-featured commercial prog
 
 =head2 VERSION HISTORY
 
+Version 1.16: Updated Nov. 12, 2017. Released Nov. 12, 2017.
+
+ -Updated validate007() with new codes from MARC Update 22 (April 2016).
+ -Verified bytes of each validate007() format against MARC 21.
+ -Revised checking of electronic resources 007/06-08 in validate007() to complain if 007/07 and 007/08 don't match 007/06 'm', 'n', and '|' (they should be 'mmm', 'nnn', or '|||').
+ -Revised checking of remote-sensing image 007/09-10 in validate007() to complain if 007/09-10 are not a valid pair.
 
 Version 1.15: Updated May 21, 2012. Released Aug. 6, 2012.
 
@@ -3482,7 +3573,7 @@ employers of the various contributors to the code.
 Bryan Baldus
 eijabb@cpan.org
 
-Copyright (c) 2004-2012.
+Copyright (c) 2004-2017.
 
 =cut
 
